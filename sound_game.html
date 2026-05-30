@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#6C63FF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SoniJuego">
+<title>SoniJuego 🎵</title>
+<style>
+:root{--bg:#FFF9F0;--primary:#6C63FF;--ok:#4CAF50;--err:#FF5252;--r:20px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);touch-action:manipulation;overflow:hidden}
+
+/* ── SCREENS ── */
+.screen{display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;padding:16px}
+.screen.active{display:flex}
+
+/* ── HOME ── */
+#home{background:linear-gradient(160deg,#a78bfa,#6C63FF,#38bdf8)}
+.h-title{font-size:clamp(2rem,8vw,3.5rem);font-weight:900;color:#fff;text-shadow:0 4px 12px rgba(0,0,0,.3);text-align:center;margin-bottom:8px}
+.h-sub{font-size:clamp(.9rem,3vw,1.3rem);color:rgba(255,255,255,.85);margin-bottom:32px;text-align:center}
+.btn-play{background:#fff;color:#6C63FF;font-size:clamp(1.1rem,3vw,1.6rem);font-weight:800;border:none;border-radius:50px;padding:18px 52px;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,.25);transition:transform .15s}
+.btn-play:active{transform:scale(.95)}
+
+/* ── GAME ── */
+#game{background:var(--bg);justify-content:flex-start;padding:12px 16px;gap:0}
+
+.top-bar{width:100%;max-width:700px;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.prog-txt{font-size:1rem;font-weight:700;color:#555}
+.gear{background:rgba(108,99,255,.15);border:none;border-radius:50%;width:40px;height:40px;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0}
+.prog-wrap{width:100%;max-width:700px;height:8px;background:#E0DDFF;border-radius:8px;overflow:hidden;margin-bottom:12px}
+.prog-bar{height:100%;background:linear-gradient(90deg,#6C63FF,#38bdf8);border-radius:8px;transition:width .4s}
+
+/* Sound button — compact */
+.snd-area{display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:8px;flex-shrink:0}
+.snd-btn{
+  background:linear-gradient(135deg,#6C63FF,#38bdf8);
+  border:none;border-radius:50%;
+  width:clamp(70px,13vmin,110px);
+  height:clamp(70px,13vmin,110px);
+  font-size:clamp(1.8rem,6vmin,3rem);
+  cursor:pointer;box-shadow:0 6px 24px rgba(108,99,255,.45);
+  transition:transform .15s;display:flex;align-items:center;justify-content:center;flex-shrink:0
+}
+.snd-btn:active{transform:scale(.92)}
+.snd-hint{font-size:clamp(.65rem,1.8vw,.85rem);font-weight:600;color:#888}
+
+/* Cards grid — fills remaining space */
+.cards-wrap{flex:1;width:100%;max-width:700px;display:flex;align-items:stretch;justify-content:center;min-height:0;padding-bottom:8px}
+.grid{
+  width:100%;
+  display:grid;
+  gap:clamp(8px,2vw,16px);
+  align-content:stretch;
+  justify-content:stretch;
+}
+.card{
+  background:#fff;border-radius:var(--r);
+  box-shadow:0 4px 16px rgba(0,0,0,.1);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:transform .15s;
+  border:3px solid transparent;
+  min-width:0;min-height:0;
+  overflow:hidden;
+}
+.card:active{transform:scale(.93)}
+.card span{font-size:clamp(2.5rem,12vmin,7rem);line-height:1;pointer-events:none;display:block}
+.card.ok{border-color:var(--ok);background:#E8F5E9;animation:pop .35s}
+.card.bad{animation:shk .4s;border-color:var(--err)}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+
+/* ── WIN ── */
+#win{background:linear-gradient(160deg,#fde68a,#fb923c,#f43f5e)}
+.trophy{font-size:clamp(4rem,15vmin,7rem);animation:bop 1s infinite alternate;margin-bottom:10px}
+@keyframes bop{from{transform:translateY(0)}to{transform:translateY(-16px)}}
+.win-t{font-size:clamp(1.8rem,6vw,3rem);font-weight:900;color:#fff;text-shadow:0 4px 12px rgba(0,0,0,.3);text-align:center;margin-bottom:8px}
+.win-s{font-size:clamp(1.8rem,6vw,3rem);margin-bottom:22px}
+.btn-rep{background:#fff;color:#f43f5e;font-size:clamp(1rem,3vw,1.6rem);font-weight:800;border:none;border-radius:50px;padding:18px 48px;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.btn-rep:active{transform:scale(.95)}
+
+/* ── SETTINGS ── */
+#settings{background:#f0f4ff}
+.s-title{font-size:clamp(1.3rem,5vw,2rem);font-weight:900;color:#6C63FF;margin-bottom:24px}
+.s-grp{width:100%;max-width:420px;background:#fff;border-radius:var(--r);padding:18px;box-shadow:0 4px 16px rgba(0,0,0,.1);margin-bottom:14px}
+.s-lbl{font-size:.95rem;font-weight:700;color:#555;margin-bottom:8px;display:block}
+.s-sel{width:100%;padding:10px 14px;border:2px solid #E0DDFF;border-radius:14px;font-size:1rem;font-weight:700;color:#333;background:#fff;cursor:pointer;outline:none}
+.btn-save{background:linear-gradient(135deg,#6C63FF,#38bdf8);color:#fff;font-size:1.1rem;font-weight:800;border:none;border-radius:50px;padding:16px 48px;cursor:pointer;box-shadow:0 6px 20px rgba(108,99,255,.4);margin-top:6px;width:100%;max-width:420px}
+
+/* ── LOADER ── */
+#loader{position:fixed;inset:0;background:rgba(255,249,240,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:12px}
+#loader.hidden{display:none}
+.spinner{width:48px;height:48px;border:5px solid #E0DDFF;border-top-color:#6C63FF;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loaderMsg{font-size:.95rem;font-weight:700;color:#6C63FF}
+#loaderBar{width:200px;height:7px;background:#E0DDFF;border-radius:7px;overflow:hidden}
+#loaderFill{height:100%;width:0%;background:linear-gradient(90deg,#6C63FF,#38bdf8);border-radius:7px;transition:width .3s}
+
+#confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999}
+.gear-ring{position:absolute;top:0;left:0;width:40px;height:40px;border-radius:50%;border:3px solid transparent;border-top-color:#6C63FF;pointer-events:none}
+.gear-ring.spin{animation:spin 3s linear forwards}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+
+<div id="loader">
+  <div class="spinner"></div>
+  <div id="loaderMsg">Cargando sonidos…</div>
+  <div id="loaderBar"><div id="loaderFill"></div></div>
+</div>
+
+<div id="home" class="screen">
+  <div class="h-title">🎵 SoniJuego</div>
+  <div class="h-sub">¡Escucha y adivina!</div>
+  <button class="btn-play" onclick="startGame()">▶ ¡Jugar!</button>
+</div>
+
+<div id="game" class="screen">
+  <div class="top-bar">
+    <div class="prog-txt" id="progTxt">1 / 10</div>
+    <button class="gear" id="gearBtn">⚙️<div class="gear-ring" id="gearRing"></div></button>
+  </div>
+  <div class="prog-wrap"><div class="prog-bar" id="progBar" style="width:0%"></div></div>
+  <div class="snd-area">
+    <button class="snd-btn" onclick="playNow()">🔊</button>
+    <div class="snd-hint">¡Pulsa para escuchar!</div>
+  </div>
+  <div class="cards-wrap">
+    <div class="grid" id="grid"></div>
+  </div>
+</div>
+
+<div id="win" class="screen">
+  <div class="trophy">🏆</div>
+  <div class="win-t">¡Bravo!</div>
+  <div class="win-s">⭐⭐⭐</div>
+  <button class="btn-rep" onclick="startGame()">🔄 ¡Otra vez!</button>
+</div>
+
+<div id="settings" class="screen">
+  <div class="s-title">⚙️ Ajustes</div>
+  <div class="s-grp">
+    <span class="s-lbl">🖼️ Opciones en pantalla</span>
+    <select class="s-sel" id="optSel">
+      <option value="2">2 imágenes</option>
+      <option value="3" selected>3 imágenes</option>
+      <option value="4">4 imágenes</option>
+      <option value="5">5 imágenes</option>
+      <option value="6">6 imágenes</option>
+    </select>
+  </div>
+  <div class="s-grp">
+    <span class="s-lbl">🎯 Sonidos por partida</span>
+    <select class="s-sel" id="rndSel">
+      <option value="5">5 sonidos</option>
+      <option value="10" selected>10 sonidos</option>
+      <option value="15">15 sonidos</option>
+      <option value="20">20 sonidos</option>
+      <option value="all">Todos</option>
+    </select>
+  </div>
+  <button class="btn-save" onclick="saveSettings()">💾 Guardar y Volver</button>
+</div>
+
+<script>
+const BASE = 'https://raw.githubusercontent.com/sgDani/sonidos-app/main/sonidos/';
+
+const catalog = [
+  { id:'aplausos',  name:'Aplausos',    emoji:'👏', file:'Aplausos.mp3' },
+  { id:'avion',     name:'Avión',       emoji:'✈️', file:'Avion.mp3' },
+  { id:'barco',     name:'Barco',       emoji:'🚢', file:'Barco.mp3' },
+  { id:'bomberos',  name:'Bomberos',    emoji:'🚒', file:'Bomberos.mp3' },
+  { id:'buho',      name:'Búho',        emoji:'🦉', file:'Buho.mp3' },
+  { id:'caballo',   name:'Caballo',     emoji:'🐴', file:'Caballo.mp3' },
+  { id:'cerdo',     name:'Cerdo',       emoji:'🐷', file:'Cerdo.mp3' },
+  { id:'elefante',  name:'Elefante',    emoji:'🐘', file:'Elefante.mp3' },
+  { id:'gallo',     name:'Gallo',       emoji:'🐓', file:'Gallo.mp3' },
+  { id:'gato',      name:'Gato',        emoji:'🐱', file:'Gato.mp3' },
+  { id:'helicop',   name:'Helicóptero', emoji:'🚁', file:'Helicoptero.mp3' },
+  { id:'leon',      name:'León',        emoji:'🦁', file:'Leon.mp3' },
+  { id:'lobo',      name:'Lobo',        emoji:'🐺', file:'Lobo.mp3' },
+  { id:'lluvia',    name:'Lluvia',      emoji:'🌧️', file:'Lluvia.mp3' },
+  { id:'mono',      name:'Mono',        emoji:'🐵', file:'Mono.mp3' },
+  { id:'moto',      name:'Moto',        emoji:'🏍️', file:'Moto.mp3' },
+  { id:'pato',      name:'Pato',        emoji:'🦆', file:'Pato.mp3' },
+  { id:'perro',     name:'Perro',       emoji:'🐶', file:'Perro.mp3' },
+  { id:'piano',     name:'Piano',       emoji:'🎹', file:'Piano.mp3' },
+  { id:'pollito',   name:'Pollito',     emoji:'🐥', file:'Pollito.mp3' },
+  { id:'puerta',    name:'Puerta',      emoji:'🚪', file:'Puerta.mp3' },
+  { id:'rana',      name:'Rana',        emoji:'🐸', file:'Rana.mp3' },
+  { id:'reloj',     name:'Reloj',       emoji:'🕰️', file:'Reloj.mp3' },
+  { id:'risas',     name:'Risas',       emoji:'😂', file:'Risas.mp3' },
+  { id:'serpiente', name:'Serpiente',   emoji:'🐍', file:'Serpiente.mp3' },
+  { id:'tambor',    name:'Tambor',      emoji:'🥁', file:'Tambor.mp3' },
+  { id:'telefono',  name:'Teléfono',    emoji:'📞', file:'Telefono.mp3' },
+  { id:'tren',      name:'Tren',        emoji:'🚂', file:'Tren.mp3' },
+  { id:'trompeta',  name:'Trompeta',    emoji:'🎺', file:'Trompeta.mp3' },
+  { id:'trueno',    name:'Trueno',      emoji:'⛈️', file:'Trueno.mp3' },
+  { id:'oveja',     name:'Oveja',       emoji:'🐑', file:'Oveja.mp3' },
+  { id:'vaca',      name:'Vaca',        emoji:'🐮', file:'Vaca.mp3' },
+];
+
+// ── AUDIO ──────────────────────────────────────────
+const audioEls = {};
+let currentAudio = null;
+const activeCatalog = [];
+
+function initAudio() {
+  const fill = document.getElementById('loaderFill');
+  const msg  = document.getElementById('loaderMsg');
+  let settled = 0;
+  const total = catalog.length;
+
+  catalog.forEach(item => {
+    const a = new Audio();
+    a.src = BASE + item.file;
+    audioEls[item.id] = a;
+
+    const done = ok => {
+      if (ok) activeCatalog.push(item);
+      settled++;
+      fill.style.width = `${settled/total*100}%`;
+      msg.textContent = `Cargando… ${settled}/${total}`;
+      if (settled === total) {
+        document.getElementById('loader').classList.add('hidden');
+        showScreen('home');
+      }
+    };
+    a.addEventListener('canplaythrough', () => done(true), {once:true});
+    a.addEventListener('error', () => done(false), {once:true});
+    setTimeout(() => { if (!activeCatalog.includes(item) && settled <= catalog.indexOf(item)) done(false); }, 9000);
+    a.load();
+  });
+}
+
+function playAudio(id) {
+  if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
+  const a = audioEls[id]; if (!a) return;
+  a.currentTime = 0;
+  a.play().catch(()=>{});
+  currentAudio = a;
+}
+
+// ── FEEDBACK TONES ─────────────────────────────────
+let AC = null;
+function getCtx(){ if(!AC) AC=new(window.AudioContext||window.webkitAudioContext)(); if(AC.state==='suspended') AC.resume(); return AC; }
+function playSuccess(){
+  const c=getCtx();
+  [523,659,784,1047].forEach((f,i)=>{
+    const o=c.createOscillator(),g=c.createGain();
+    o.type='sine';o.frequency.value=f;
+    g.gain.setValueAtTime(.4,c.currentTime+i*.13);
+    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+i*.13+.3);
+    o.connect(g);g.connect(c.destination);
+    o.start(c.currentTime+i*.13);o.stop(c.currentTime+i*.13+.35);
+  });
+}
+function playError(){
+  const c=getCtx();
+  const o=c.createOscillator(),g=c.createGain();
+  o.type='sawtooth';o.frequency.value=160;
+  g.gain.setValueAtTime(.22,c.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.4);
+  o.connect(g);g.connect(c.destination);
+  o.start();o.stop(c.currentTime+.4);
+}
+
+// ── GAME ───────────────────────────────────────────
+let cfg={options:3,rounds:10}, queue=[], cur=0, locked=false, gearTimer=null;
+function shuffle(a){return[...a].sort(()=>Math.random()-.5)}
+function pool(){ return activeCatalog.length>0 ? activeCatalog : catalog; }
+
+function startGame(){
+  locked=false;
+  const p=pool();
+  const t=cfg.rounds==='all'?p.length:Math.min(cfg.rounds,p.length);
+  queue=shuffle(p).slice(0,t);
+  cur=0; showScreen('game'); renderRound();
+}
+
+function setGridLayout(n) {
+  const grid = document.getElementById('grid');
+  const wrap = document.querySelector('.cards-wrap');
+  const isLandscape = window.innerWidth > window.innerHeight;
+  const cols = isLandscape ? (n <= 3 ? n : n <= 4 ? 4 : 3) : 2;
+  const rows = Math.ceil(n / cols);
+  const gap = Math.round(Math.min(window.innerWidth, window.innerHeight) * 0.025);
+  const availH = wrap.clientHeight - gap * (rows - 1) - 8;
+  const availW = wrap.clientWidth  - gap * (cols - 1);
+  const cellH = Math.floor(availH / rows);
+  const cellW = Math.floor(availW / cols);
+  const cell  = Math.min(cellH, cellW);
+  grid.style.gridTemplateColumns = `repeat(${cols}, ${cell}px)`;
+  grid.style.gridAutoRows = `${cell}px`;
+  grid.style.gap = `${gap}px`;
+  grid.style.width = 'auto';
+}
+
+function renderRound(){
+  locked=false;
+  const item=queue[cur], t=queue.length;
+  document.getElementById('progTxt').textContent=`${cur+1} / ${t}`;
+  document.getElementById('progBar').style.width=`${cur/t*100}%`;
+
+  const n = cfg.options;
+  const grid = document.getElementById('grid');
+  const others = shuffle(pool().filter(c=>c.id!==item.id)).slice(0,n-1);
+  const choices = shuffle([item,...others]);
+
+  grid.innerHTML='';
+  choices.forEach(c=>{
+    const div=document.createElement('div');
+    div.className='card';
+    div.innerHTML=`<span>${c.emoji}</span>`;
+    div.onclick=()=>handleChoice(c.id===item.id,div);
+    grid.appendChild(div);
+  });
+
+  // Wait one frame so layout is ready, then size
+  requestAnimationFrame(()=>setGridLayout(n));
+  setTimeout(()=>playNow(),500);
+}
+
+function playNow(){ if(!locked&&queue[cur]) playAudio(queue[cur].id); }
+
+function handleChoice(ok,el){
+  if(locked)return;
+  if(ok){
+    locked=true; el.classList.add('ok'); playSuccess(); doConfetti();
+    setTimeout(()=>{ cur++; cur>=queue.length?(showScreen('win'),doConfetti(true)):renderRound(); },2000);
+  } else {
+    el.classList.add('bad'); playError();
+    setTimeout(()=>el.classList.remove('bad'),450);
+  }
+}
+
+window.addEventListener('resize', ()=>{ if(document.getElementById('game').classList.contains('active')) setGridLayout(cfg.options); });
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── GEAR ───────────────────────────────────────────
+const gearBtn=document.getElementById('gearBtn'),gearRing=document.getElementById('gearRing');
+gearBtn.addEventListener('pointerdown',()=>{ gearRing.classList.add('spin'); gearTimer=setTimeout(()=>openSettings(),3000); });
+['pointerup','pointerleave','pointercancel'].forEach(e=>gearBtn.addEventListener(e,()=>{ clearTimeout(gearTimer); gearRing.classList.remove('spin'); }));
+function openSettings(){ gearRing.classList.remove('spin'); document.getElementById('optSel').value=cfg.options; document.getElementById('rndSel').value=cfg.rounds; showScreen('settings'); }
+function saveSettings(){ cfg.options=parseInt(document.getElementById('optSel').value)||3; const v=document.getElementById('rndSel').value; cfg.rounds=v==='all'?'all':parseInt(v); startGame(); }
+
+// ── CONFETTI ───────────────────────────────────────
+function doConfetti(big=false){
+  const cv=document.getElementById('confetti'),cx=cv.getContext('2d');
+  cv.width=innerWidth;cv.height=innerHeight;
+  const cols=['#6C63FF','#38bdf8','#fb923c','#4CAF50','#fde68a','#f43f5e','#a78bfa'];
+  const pieces=Array.from({length:big?200:90},()=>({x:Math.random()*cv.width,y:-20,w:8+Math.random()*8,h:14+Math.random()*10,color:cols[Math.random()*cols.length|0],angle:Math.random()*360,speed:3+Math.random()*5,rot:(Math.random()-.5)*8}));
+  (function draw(){cx.clearRect(0,0,cv.width,cv.height);pieces.forEach(p=>{p.y+=p.speed;p.angle+=p.rot;cx.save();cx.translate(p.x,p.y);cx.rotate(p.angle*Math.PI/180);cx.fillStyle=p.color;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore();});if(pieces.some(p=>p.y<cv.height))requestAnimationFrame(draw);else cx.clearRect(0,0,cv.width,cv.height);})();
+}
+
+window.addEventListener('load', initAudio);
+</script>
+</body>
+</html>
