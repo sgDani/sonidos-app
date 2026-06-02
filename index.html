@@ -111,6 +111,13 @@ html,body{width:100%;height:100%;font-family:'Segoe UI',Arial,sans-serif;backgro
   <div id="loaderBar"><div id="loaderFill"></div></div>
 </div>
 
+<div id="diagnostic" style="display:none;position:fixed;inset:0;background:rgba(240,244,255,.98);z-index:9998;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;overflow-y:auto;gap:12px">
+  <div style="font-size:1.1rem;font-weight:900;color:#6C63FF;margin-bottom:4px">🔍 Diagnóstico de sonidos</div>
+  <div id="diag-found" style="width:100%;max-width:420px;background:#fff;border-radius:14px;padding:14px;box-shadow:0 3px 12px rgba(0,0,0,.1);font-size:.82rem;line-height:1.8;color:#333"></div>
+  <div id="diag-missing" style="width:100%;max-width:420px;background:#fff5f5;border-radius:14px;padding:14px;box-shadow:0 3px 12px rgba(0,0,0,.1);font-size:.82rem;line-height:1.8;color:#c62828"></div>
+  <button onclick="document.getElementById('diagnostic').style.display='none';showScreen('home')" style="background:linear-gradient(135deg,#6C63FF,#38bdf8);color:#fff;border:none;border-radius:50px;padding:14px 40px;font-size:1rem;font-weight:800;cursor:pointer;margin-top:8px">▶ Jugar con los disponibles</button>
+</div>
+
 <div id="home" class="screen">
   <div class="h-title">🎵 SoniJuego</div>
   <div class="h-sub">¡Escucha y adivina!</div>
@@ -169,37 +176,36 @@ const BASE = 'https://raw.githubusercontent.com/sgDani/sonidos-app/main/sonidos/
 
 const catalog = [
   { id:'aplausos',  name:'Aplausos',    emoji:'👏', file:'Aplausos.mp3' },
-  { id:'avion',     name:'Avión',       emoji:'✈️', file:'Avion.mp3' },
   { id:'barco',     name:'Barco',       emoji:'🚢', file:'Barco.mp3' },
   { id:'bomberos',  name:'Bomberos',    emoji:'🚒', file:'Bomberos.mp3' },
-  { id:'buho',      name:'Búho',        emoji:'🦉', file:'Buho.mp3' },
-  { id:'caballo',   name:'Caballo',     emoji:'🐴', file:'Caballo.mp3' },
-  { id:'cerdo',     name:'Cerdo',       emoji:'🐷', file:'Cerdo.mp3' },
-  { id:'elefante',  name:'Elefante',    emoji:'🐘', file:'Elefante.mp3' },
-  { id:'gallo',     name:'Gallo',       emoji:'🐓', file:'Gallo.mp3' },
-  { id:'gato',      name:'Gato',        emoji:'🐱', file:'Gato.mp3' },
-  { id:'helicop',   name:'Helicóptero', emoji:'🚁', file:'Helicoptero.mp3' },
-  { id:'leon',      name:'León',        emoji:'🦁', file:'Leon.mp3' },
-  { id:'lobo',      name:'Lobo',        emoji:'🐺', file:'Lobo.mp3' },
-  { id:'lluvia',    name:'Lluvia',      emoji:'🌧️', file:'Lluvia.mp3' },
-  { id:'mono',      name:'Mono',        emoji:'🐵', file:'Mono.mp3' },
+  { id:'buho',      name:'Búho',        emoji:'🦉', file:'buho.mp3' },
+  { id:'caballo',   name:'Caballo',     emoji:'🐴', file:'caballo.mp3' },
+  { id:'cerdo',     name:'Cerdo',       emoji:'🐷', file:'cerdo.mp3' },
+  { id:'elefante',  name:'Elefante',    emoji:'🐘', file:'elefante.mp3' },
+  { id:'gallo',     name:'Gallo',       emoji:'🐓', file:'gallo.mp3' },
+  { id:'gallina',   name:'Gallina',     emoji:'🐔', file:'gallina.mp3' },
+  { id:'gato',      name:'Gato',        emoji:'🐱', file:'gato.mp3' },
+  { id:'helicop',   name:'Helicóptero', emoji:'🚁', file:'helicoptero.mp3' },
+  { id:'leon',      name:'León',        emoji:'🦁', file:'leon.mp3' },
+  { id:'lobo',      name:'Lobo',        emoji:'🐺', file:'lobo.mp3' },
+  { id:'lluvia',    name:'Lluvia',      emoji:'🌧️', file:'lluvia.mp3' },
+  { id:'mono',      name:'Mono',        emoji:'🐵', file:'mono.mp3' },
   { id:'moto',      name:'Moto',        emoji:'🏍️', file:'Moto.mp3' },
-  { id:'pato',      name:'Pato',        emoji:'🦆', file:'Pato.mp3' },
-  { id:'perro',     name:'Perro',       emoji:'🐶', file:'Perro.mp3' },
+  { id:'oveja',     name:'Oveja',       emoji:'🐑', file:'oveja.mp3' },
+  { id:'pato',      name:'Pato',        emoji:'🦆', file:'pato.mp3' },
+  { id:'perro',     name:'Perro',       emoji:'🐶', file:'Perro.ogg' },
   { id:'piano',     name:'Piano',       emoji:'🎹', file:'Piano.mp3' },
-  { id:'pollito',   name:'Pollito',     emoji:'🐥', file:'Pollito.mp3' },
   { id:'puerta',    name:'Puerta',      emoji:'🚪', file:'Puerta.mp3' },
-  { id:'rana',      name:'Rana',        emoji:'🐸', file:'Rana.mp3' },
+  { id:'rana',      name:'Rana',        emoji:'🐸', file:'rana.mp3' },
   { id:'reloj',     name:'Reloj',       emoji:'🕰️', file:'Reloj.mp3' },
   { id:'risas',     name:'Risas',       emoji:'😂', file:'Risas.mp3' },
-  { id:'serpiente', name:'Serpiente',   emoji:'🐍', file:'Serpiente.mp3' },
+  { id:'serpiente', name:'Serpiente',   emoji:'🐍', file:'serpiente.mp3' },
   { id:'tambor',    name:'Tambor',      emoji:'🥁', file:'Tambor.mp3' },
   { id:'telefono',  name:'Teléfono',    emoji:'📞', file:'Telefono.mp3' },
-  { id:'tren',      name:'Tren',        emoji:'🚂', file:'Tren.mp3' },
+  { id:'tren',      name:'Tren',        emoji:'🚂', file:'tren.mp3' },
   { id:'trompeta',  name:'Trompeta',    emoji:'🎺', file:'Trompeta.mp3' },
   { id:'trueno',    name:'Trueno',      emoji:'⛈️', file:'Trueno.mp3' },
-  { id:'oveja',     name:'Oveja',       emoji:'🐑', file:'Oveja.mp3' },
-  { id:'vaca',      name:'Vaca',        emoji:'🐮', file:'Vaca.mp3' },
+  { id:'vaca',      name:'Vaca',        emoji:'🐮', file:'vaca.mp3' },
 ];
 
 // ── AUDIO ──────────────────────────────────────────
@@ -207,32 +213,51 @@ const audioEls = {};
 let currentAudio = null;
 const activeCatalog = [];
 
-function initAudio() {
+async function tryLoadAudio(item) {
+  // Try all variants: original, lowercase, and .ogg extension
+  const lower = item.file.toLowerCase();
+  const ogg = lower.replace('.mp3', '.ogg');
+  const variants = [item.file, lower, ogg];
+  for (const filename of variants) {
+    const ok = await new Promise(resolve => {
+      const a = new Audio();
+      a.src = BASE + filename;
+      a.addEventListener('canplaythrough', () => resolve({a, filename}), {once:true});
+      a.addEventListener('error', () => resolve(null), {once:true});
+      setTimeout(() => resolve(null), 8000);
+      a.load();
+    });
+    if (ok) {
+      audioEls[item.id] = ok.a;
+      return ok.filename; // return the filename that worked
+    }
+  }
+  return null;
+}
+
+async function initAudio() {
   const fill = document.getElementById('loaderFill');
   const msg  = document.getElementById('loaderMsg');
-  let settled = 0;
   const total = catalog.length;
+  const found = [], missing = [];
+  let settled = 0;
 
-  catalog.forEach(item => {
-    const a = new Audio();
-    a.src = BASE + item.file;
-    audioEls[item.id] = a;
+  await Promise.all(catalog.map(async item => {
+    const filename = await tryLoadAudio(item);
+    if (filename) {
+      activeCatalog.push(item);
+      found.push({...item, resolvedFile: filename});
+    } else {
+      missing.push(item);
+    }
+    settled++;
+    fill.style.width = `${settled/total*100}%`;
+    msg.textContent = `Cargando… ${settled}/${total}`;
+  }));
 
-    const done = ok => {
-      if (ok) activeCatalog.push(item);
-      settled++;
-      fill.style.width = `${settled/total*100}%`;
-      msg.textContent = `Cargando… ${settled}/${total}`;
-      if (settled === total) {
-        document.getElementById('loader').classList.add('hidden');
-        showScreen('home');
-      }
-    };
-    a.addEventListener('canplaythrough', () => done(true), {once:true});
-    a.addEventListener('error', () => done(false), {once:true});
-    setTimeout(() => { if (!activeCatalog.includes(item) && settled <= catalog.indexOf(item)) done(false); }, 9000);
-    a.load();
-  });
+  document.getElementById('loader').classList.add('hidden');
+  if (missing.length > 0) showDiagnostic(found, missing);
+  else showScreen('home');
 }
 
 function playAudio(id) {
@@ -341,6 +366,20 @@ window.addEventListener('resize', ()=>{ if(document.getElementById('game').class
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+}
+
+// ── DIAGNOSTIC ─────────────────────────────────────
+function showDiagnostic(found, missing) {
+  const el = document.getElementById('diagnostic');
+  document.getElementById('diag-found').innerHTML =
+    `<b>✅ Encontrados (${found.length}):</b><br>` +
+    found.map(i=>`${i.emoji} ${i.name} <span style="color:#aaa;font-size:.7rem">${i.resolvedFile}</span>`).join('<br>');
+  document.getElementById('diag-missing').innerHTML =
+    missing.length
+      ? `<b>❌ No encontrados (${missing.length}):</b><br>` +
+        missing.map(i=>`${i.emoji} ${i.name} <span style="color:#aaa;font-size:.7rem">${i.file}</span>`).join('<br>')
+      : '';
+  el.style.display = 'flex';
 }
 
 // ── GEAR ───────────────────────────────────────────
